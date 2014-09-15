@@ -46,6 +46,17 @@ func GetConn() (*RedisConn, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// Performs simple connection check. Redial if needed
+	_, err = resource.(*RedisConn).Do("PING")
+	if err != nil {
+		resource.(*RedisConn).Close()
+		resource, err = redisConnFromUri(uri)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return resource.(*RedisConn), nil
 }
 
